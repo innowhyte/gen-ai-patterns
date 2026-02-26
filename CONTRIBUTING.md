@@ -6,7 +6,7 @@ Thanks for helping improve this repo.
 
 1. Check if a similar pattern already exists.
 2. Keep the write-up concrete and short.
-3. Include tradeoffs and failure modes.
+3. Avoid filler sections. Only add sections that provide concrete insight.
 
 ## For a new pattern
 
@@ -33,9 +33,9 @@ If a new category is needed, open an issue first.
 - [ ] Problem is clear
 - [ ] Condition/when-to-use is clear
 - [ ] Solution is actionable
-- [ ] Tradeoffs are included
-- [ ] Failure modes are included
 - [ ] Example is included
+- [ ] Tradeoffs are included if they are concrete
+- [ ] Failure modes are included if they are realistic and specific
 
 ## Style
 

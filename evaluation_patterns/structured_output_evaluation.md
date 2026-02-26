@@ -1,6 +1,6 @@
 # Structured Output Evaluation
 
-# Problem
+## Problem
 
 When your AI system generates structured outputs, simply checking for an exact match between the actual and expected output using a boolean comparison is not sufficient. During experimentation with different parameters, determining which output is better requires a numerical score.
 
@@ -8,7 +8,7 @@ However, evaluating structured outputs presents challenges, especially when deal
 
 \[REPHRASE\]: Allows focusing on examples with low numerical values, allows us to get some patterns, etc.
 
-# Condition
+## Condition
 
 - This pattern applies to any use case involving structured output.
 
@@ -18,7 +18,7 @@ However, evaluating structured outputs presents challenges, especially when deal
 - Candidates details extraction from a resume
 - Citations for a RAG response
 
-# Solution
+## Solution
 
 ## 1. Identify the Nature of the Structure
 
@@ -250,3 +250,27 @@ Finally, apply the evaluation metrics to compute the final **accuracy score** fo
 ## Benefits
 
 - When testing a dataset with numerous examples, assigning a numerical score helps pinpoint low-performing cases, making it easier to identify patterns where the application may be failing. This level of insight wouldn’t be achievable with a simple boolean evaluation.
+
+## Tradeoffs
+
+- More informative than boolean checks, but higher implementation effort.
+- Better diagnosis across data types, but requires metric selection discipline.
+- Stronger evaluation rigor, but added preprocessing and normalization overhead.
+
+## Failure Modes
+
+- Wrong metric chosen for a field type leads to misleading scores.
+- Field weights are arbitrary and hide critical errors.
+- Aggregated score looks good while specific critical fields fail.
+- Preprocessing changes semantics and masks true output defects.
+
+## Example
+
+For invoice extraction, score each field by type and then aggregate:
+
+- `invoice_total`: MAE with tolerance
+- `vendor_name`: text similarity \(embedding or token-based\)
+- `invoice_date`: absolute time difference
+- `line_items`: sequence-aware comparison
+
+Use explicit field weights so business-critical fields impact the final score more.

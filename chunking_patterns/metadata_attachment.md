@@ -1,6 +1,6 @@
 # Metadata Attachment
 
-# Problem
+## Problem
 
 When dealing with large collections of documents in Retrieval-Augmented Generation \(RAG\) applications, simply breaking content into smaller chunks and embedding them for semantic retrieval often leads to an unmanageably large search space. Without a mechanism to filter or narrow down which chunks to retrieve, the system may return irrelevant results or waste time ranking too many candidate chunks. This problem is amplified when:
 
@@ -14,7 +14,7 @@ When dealing with large collections of documents in Retrieval-Augmented Generati
 - **Performance**: Large-scale retrieval over thousands of chunks without the ability to reduce the initial candidate pool leads to high computational cost and slow response times.
 - **Maintainability**: When new documents are added or existing ones updated, you need a systematic approach for capturing essential attributes that might be used in future queries.
 
-# Condition
+## Condition
 
 This pattern is best suited when:
 
@@ -29,7 +29,7 @@ This pattern is best suited when:
 - **Research Papers Repository**: Researchers or students filter by publication date, journal name, or author.
 - **E-commerce Product Info**: Queries about specific categories or brands require chunk-level filtering \(e.g., product manuals, shipping instructions\).
 
-# Solution
+## Solution
 
 The Metadata Attachment pattern involves enriching each chunk of data with carefully chosen metadata fields. By attaching relevant metadata, you can perform filtered retrieval—only searching or ranking chunks that match specific attributes, drastically reducing the search space.
 
@@ -85,3 +85,21 @@ Below is a conceptual diagram to illustrate the approach:
     - **Scalability**: As your document store grows, metadata filtering helps manage complexity by avoiding exhaustive searches across all chunks.
 
 By systematically applying metadata to each chunk, you ensure that the system can target only the most relevant data, increase the accuracy of results, and reduce the computational overhead—offering an effective solution for RAG applications operating at scale.
+
+## Tradeoffs
+
+- Better filtering and precision, but added metadata modeling and maintenance effort.
+- Faster retrieval on scoped queries, but higher storage and indexing overhead.
+- Stronger control over relevance, but increased implementation complexity across ingestion and update pipelines.
+
+## Failure Modes
+
+- Metadata fields are incomplete or inconsistent across sources.
+- Filters are too strict and hide relevant chunks.
+- Metadata is outdated after document updates, causing retrieval mismatch.
+- Teams add too many low-value fields, increasing cost without quality gains.
+
+## Example
+
+An internal knowledge search system stores chunks with `department`, `doc_type`, and `updated_at`.  
+For a query like “latest engineering onboarding policy,” retrieval first filters by `department=engineering` and `doc_type=policy`, then applies vector search on the filtered subset.

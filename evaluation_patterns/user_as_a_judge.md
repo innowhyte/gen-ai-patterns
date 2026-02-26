@@ -1,6 +1,6 @@
 # User As Judge
 
-# Problem
+## Problem
 
 Evaluating AI-generated outputs often requires feedback from the end-user, as their expectations and preferences ultimately determine the effectiveness of the system. While formula-based, AI-driven, and expert evaluations provide structured assessments, they may not fully capture real-world usability, user satisfaction, and domain-specific needs.
 
@@ -13,7 +13,7 @@ Without user-driven evaluation, the following challenges arise:
 
 The **User As Judge** pattern allows direct user feedback to guide AI improvements, ensuring that generative AI systems align with real-world needs.
 
-# Condition
+## Condition
 
 This pattern is best suited when:
 
@@ -28,7 +28,7 @@ This pattern is best suited when:
 
 However, this pattern **may not be ideal** for applications requiring absolute correctness, such as legal, medical, or financial AI systems, where expert judgment is necessary.
 
-# Solution
+## Solution
 
 The **User As Judge** pattern incorporates direct user feedback into the AI evaluation process, either through implicit behavioral tracking or explicit rating mechanisms.
 
@@ -40,7 +40,9 @@ The **User As Judge** pattern incorporates direct user feedback into the AI eval
 4. **Adjust AI Models Based on Feedback:** Use reinforcement learning, fine-tuning, or weighted algorithms to adapt AI behavior over time.
 5. **Ensure Ethical and Transparent Use of Feedback:** Clearly communicate how user data is used to improve AI models, maintaining trust and compliance with data privacy laws.
 
-### Example: Evaluating AI-Generated Chatbot Responses
+## Example
+
+Evaluating AI-generated chatbot responses:
 
 Consider an AI-powered customer support chatbot where user feedback is collected to improve response quality. The evaluation process includes:
 
@@ -71,3 +73,16 @@ Consider an AI-powered customer support chatbot where user feedback is collected
 - **Enhances user trust and engagement**, as users see their feedback directly influencing AI improvements.
 
 This pattern is particularly valuable for consumer AI applications where user experience and satisfaction are critical drivers of success.
+
+## Tradeoffs
+
+- Direct alignment with user expectations, but feedback can be noisy.
+- Continuous improvement signal, but requires careful data handling and filtering.
+- High scalability, but bias from vocal user segments can skew decisions.
+
+## Failure Modes
+
+- Low feedback rates produce weak or biased signals.
+- Implicit metrics are misread as quality signals without context.
+- Personalization overfits to short-term preferences and degrades general quality.
+- Teams collect feedback but do not close the loop with measurable changes.

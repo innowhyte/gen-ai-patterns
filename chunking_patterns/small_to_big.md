@@ -1,6 +1,6 @@
 # Small-to-Big
 
-# Problem
+## Problem
 
 When building Retrieval-Augmented Generation \(RAG\) applications, one common challenge is finding the right balance between retrieving enough context to answer a question accurately and ensuring that the retrieval process remains precise.
 
@@ -13,7 +13,7 @@ When building Retrieval-Augmented Generation \(RAG\) applications, one common ch
     3. The “Small-to-Big” pattern tackles both issues by combining the best of both worlds.
 
 ---
-# Condition
+## Condition
 
 - **When to Use It**
     - You need to retrieve highly targeted information from large repositories \(e.g., large databases, corpora, or knowledge bases\).
@@ -25,7 +25,7 @@ When building Retrieval-Augmented Generation \(RAG\) applications, one common ch
     3. **Legal Document Review**: Retrieve specific clauses or paragraphs \(small chunks\) in contracts but keep entire contract sections \(bigger chunks\) accessible for deeper analysis.
 
 ---
-# Solution
+## Solution
 
 The “Small-to-Big” pattern involves splitting your knowledge base into two layers of chunks:
 
@@ -89,3 +89,20 @@ A **high-level workflow** might look like this:
 - **Scalability**: This approach scales well for large document collections, balancing retrieval precision with comprehensive coverage.
 
 By systematically distinguishing the role of smaller chunks for retrieval and bigger chunks for synthesis, the “Small-to-Big” pattern ensures both a high-precision retrieval step and a thorough generative process, leading to answers that are both precise and complete.
+
+## Tradeoffs
+
+- Higher retrieval precision, but extra engineering to maintain two chunk layers.
+- Better final context for synthesis, but additional storage and linking overhead.
+- More controllable quality, but more moving parts in indexing and retrieval.
+
+## Failure Modes
+
+- Parent-child links between small and big chunks are missing or incorrect.
+- Small chunks are over-compressed and lose critical retrieval cues.
+- Big chunks are too large for synthesis and reintroduce context noise.
+- Teams optimize retrieval precision but skip end-to-end answer quality checks.
+
+## Example
+
+In a legal assistant, retrieve matching clauses as small chunks first, then pull the full section containing each clause before answer generation.

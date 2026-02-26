@@ -1,6 +1,6 @@
 # Human As Judge
 
-# Problem
+## Problem
 
 Generative AI models produce outputs that often require subjective evaluation, especially for tasks involving creativity, ethics, and contextual accuracy. While formula-based and AI-driven evaluation methods provide scalability, they struggle with complex human judgment aspects such as intent, cultural relevance, and usability.
 
@@ -13,7 +13,7 @@ Without human involvement in the evaluation process, the following challenges ar
 
 The **Human As Judge** pattern addresses these issues by incorporating human evaluators, such as domain experts, testers, into the assessment pipeline.
 
-# Condition
+## Condition
 
 This pattern is best suited when:
 
@@ -27,7 +27,7 @@ This pattern is best suited when:
 
 However, this pattern **may not be ideal** for high-volume, repetitive tasks where human involvement would be costly and inefficient.
 
-# Solution
+## Solution
 
 The **Human As Judge** pattern involves structured human evaluation, either through direct assessment or guided frameworks, to ensure AI-generated content meets the required quality standards.
 
@@ -38,7 +38,9 @@ The **Human As Judge** pattern involves structured human evaluation, either thro
 3. **Use Structured Testing Frameworks:** Implement checklists, rubrics, or qualitative scoring methods to ensure consistent evaluation.
 4. **Combine Human and AI Evaluation:** Where possible, blend human judgment with automated metrics for scalable yet high-quality assessments.
 
-### Example: Testing AI-Generated Medical Summaries
+## Example
+
+Testing AI-generated medical summaries:
 
 For an AI system that generates medical summaries, human judges \(such as doctors or medical researchers\) assess:
 
@@ -71,3 +73,16 @@ A structured rubric may be used where evaluators score each criterion on a scale
 - **Supports iterative improvement**, as feedback can be directly used to fine-tune AI models.
 
 This pattern is particularly valuable in high-stakes applications where human judgment is essential for ensuring safety, usability, and ethical integrity.
+
+## Tradeoffs
+
+- Highest contextual and domain judgment quality, but expensive and slow at scale.
+- Rich qualitative feedback, but evaluator consistency is harder to maintain.
+- Strong adaptability for edge cases, but operational coordination is heavier.
+
+## Failure Modes
+
+- Rubrics are vague, causing inconsistent scoring.
+- Evaluator pool is too narrow, introducing systematic bias.
+- Review throughput becomes a bottleneck in release cycles.
+- Feedback is collected but not translated into model or prompt improvements.

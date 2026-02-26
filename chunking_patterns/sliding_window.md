@@ -1,6 +1,6 @@
 # Sliding Window
 
-# Problem
+## Problem
 
 In RAG applications, documents or text can be too large to fit into a language model’s context window. Splitting the text into chunks \(also referred to as segments or windows\) is critical to ensure the language model receives manageable input sizes and relevant context. However, naively dividing the text can result in cutting sentences, words, or complete thoughts in half. This can disrupt comprehension, lead to poor retrieval quality, or omit critical information.
 
@@ -14,7 +14,7 @@ In RAG applications, documents or text can be too large to fit into a language m
 - **Loss of Context:** Without overlapping windows, large portions of text can be prematurely cut off, leading to incomplete information in each chunk.
 - **Disconnected Chunks:** Cutting at arbitrary boundaries \(e.g., strictly fixed character counts\) may break semantic units and degrade the model’s understanding of the content.
 
-# Condition
+## Condition
 
 ### When to Use Sliding Window Chunking
 
@@ -35,7 +35,7 @@ In RAG applications, documents or text can be too large to fit into a language m
     1. Before applying more sophisticated techniques, you might want to do a first pass with a sliding window to label or categorize text.
 
 ---
-# Solution
+## Solution
 
 ### How It Works
 
@@ -97,3 +97,21 @@ Overlap: O characters
 ### Putting It All Together
 
 The **Sliding Window** design pattern is a practical, easy-to-implement method for chunking text in RAG applications. By setting a fixed size—whether in characters or tokens—then overlapping successive chunks, you balance coverage and manage context constraints. This pattern shines in scenarios where simplicity and guaranteed coverage are more important than precise semantic boundaries. However, for tasks requiring deeper semantic understanding—like sentiment analysis or advanced summarization—you will likely need more sophisticated chunking strategies.
+
+## Tradeoffs
+
+- Easy to implement, but semantic boundaries are often imperfect.
+- Better coverage through overlap, but higher storage and retrieval cost due to duplication.
+- Predictable chunk sizing, but potential redundancy during downstream processing.
+
+## Failure Modes
+
+- Window size is too small and context becomes fragmented.
+- Overlap is too low, causing boundary information loss.
+- Overlap is too high, causing unnecessary duplication and latency.
+- Character-based chunks drift from token limits in model-specific pipelines.
+
+## Example
+
+For raw support logs, chunk by 700 tokens with 150-token overlap.  
+This keeps each chunk within model limits while preserving continuity across adjacent log events.
