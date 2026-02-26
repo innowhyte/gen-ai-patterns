@@ -5,6 +5,17 @@ A practical collection of patterns for building GenAI systems.
 This repo is meant to be useful, not academic.  
 Each pattern focuses on when to use it, how to apply it, and what to watch out for.
 
+## Why this exists
+
+We built this at Innowhyte, with a belief in pattern-oriented innovation.
+
+GenAI changes fast. New patterns emerge quickly, and older ones can become less useful over time.  
+Teams across projects discover what works, what fails, and what is repeatable.
+
+This repository is our central place to capture those tried-and-tested patterns, keep them updated, and make them open so others can reuse and improve them.
+
+This work is also inspired by the POSA (Pattern-Oriented Software Architecture) series and related references we have relied on over time.
+
 ## Current pattern groups
 
 - Chunking
