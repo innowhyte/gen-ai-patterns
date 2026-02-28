@@ -1,6 +1,4 @@
-# Construction
-
-# Query Construction
+# Query Construction Pattern
 
 ## Problem
 
@@ -18,7 +16,6 @@ When building Retrieval-Augmented Generation \(RAG\) applications that integrate
 - **Increased Latency and Cost:** Relying on unoptimized queries \(e.g., full-text search against large datasets\) can lead to high latency and increased operational costs.
 - **Limited Query Expressiveness:** Many advanced query capabilities \(like aggregations, constraints, path traversals in a graph\) are lost if the system only accepts a single format \(natural language or naive keyword search\).
 
----
 ## Condition
 
 **When to use this pattern:**
@@ -27,13 +24,6 @@ When building Retrieval-Augmented Generation \(RAG\) applications that integrate
 2. **Complex Retrieval Needs:** The user or system requires filtering, aggregation, or traversal logic that cannot be adequately expressed with a simple text query.
 3. **High Volume and High Complexity Data:** Large-scale enterprise knowledge bases, financial databases with complex joins, or knowledge graphs with intricate relationships.
 
-**Example use cases:**
-
-- **Financial Reports Analysis:** Users ask natural language questions about financial metrics stored in large SQL databases and require precise SQL queries.
-- **Knowledge Graph Traversal:** A chatbot for organizational knowledge that needs to retrieve employee records and their reporting hierarchy via Cypher queries in a graph database.
-- **Multi-Structure RAG System:** An analytics platform combining product manuals \(text\) and product inventory data \(structured\) to answer questions about item availability, pricing, or historical sales.
-
----
 ## Solution
 
 **Core idea:** Transform and enrich the user’s natural language query into a structured query \(e.g., SQL, Cypher\) that accurately addresses the data source’s schema and leverages available metadata or semantic information.
@@ -55,22 +45,23 @@ Below is a conceptual diagram illustrating the process:
 3. **Query Generation:** Construct the target query \(SQL, Cypher, etc.\) leveraging known joins, filters, or graph paths. Possibly refine or optimize the query \(e.g., limit, offset, or indexing hints\).
 4. **Execution & Retrieval:** Send the structured query to the respective data source, retrieve results, and feed them back into the RAG pipeline.
 
-### Important Considerations
+## Example
+
+- Financial reports analysis: a user asks for quarterly gross margin trends across business units; the system maps the request to SQL with date filters, grouping, and joins on finance tables before returning structured rows to the RAG layer.
+- Knowledge graph traversal: a user asks who reports to a director and which projects they own; the system converts intent to Cypher traversal with relationship constraints and returns matched nodes/edges.
+- Multi-structure RAG system: a user asks about product availability and historical sales; the system issues SQL for inventory and sales tables, combines the results with manual text retrieval, then passes aligned evidence to generation.
+
+## Tradeoffs
+
+- Gain: higher retrieval precision for structured sources through schema-aware queries.
+- Gain: support for advanced operations such as joins, filters, and graph traversals.
+- Cost: added system complexity for schema mapping and query generation across multiple backends.
+- Cost: extra maintenance for schema evolution and query validation logic.
+
+## Failure Modes
 
 - **Schema Understanding:** You need a well-defined representation of the schema or ontology for the system to generate accurate queries.
 - **Query Validation:** Generated queries may be syntactically or semantically incorrect. Implement robust validation and error handling to avoid system failures.
 - **Performance & Cost:** Complex queries \(e.g., multiple joins, deep graph traversals\) can be expensive. Employ caching, indexing, or sub-queries to optimize retrieval.
 - **Security & Access Control:** Ensure that dynamically generated queries respect user permissions and do not expose sensitive data inadvertently.
 - **Scalability:** As the number of data sources grows, a modular or service-based approach to query generation keeps complexity in check.
-
-### Analysis
-
-- **Cost:** A well-crafted structured query can significantly reduce data scanning costs, but designing and maintaining robust Text-to-Query pipelines can introduce overhead in development and infrastructure.
-- **Complexity:** The complexity lies in mapping natural language elements to the correct schema references and optimizing the query. Maintenance of schema knowledge and transformations can grow with data source diversity. The implementation can become complex if there are large number of schemas in the structured data store. So, selecting the right schema for the query is an important step.
-- **Evaluation:** Continuous evaluation is needed to ensure that the generated queries accurately capture user intent and remain efficient as data grows or schemas evolve.
-- **Unique Benefits:**
-    - **Precision & Efficiency:** By leveraging structured queries, you retrieve exactly what you need rather than large swaths of unstructured text.
-    - **Enhanced Capabilities:** Enables advanced data manipulations—aggregations, filtering, relationships—that are not possible with simple keyword-based approaches.
-    - **Better User Experience:** The user can ask questions in natural language while the system handles the complexity of data access behind the scenes.
-
-By applying **Query Construction**, RAG applications ensure robust access to heterogeneous data sources, providing both higher-quality responses and more efficient data retrieval.

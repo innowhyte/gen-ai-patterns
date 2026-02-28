@@ -1,4 +1,6 @@
-# Problem
+# Query Transformation Pattern
+
+## Problem
 
 Retrieval-Augmented Generation \(RAG\) systems often rely on the user’s **original** query to fetch relevant documents. However, users’ queries can be:
 
@@ -14,8 +16,7 @@ Without a strategy to clean, simplify, or reframe queries, these issues can unde
 - **Scalability**: In large-scale RAG or enterprise search scenarios, each query needs to be processed efficiently and effectively to save time and cost.
 - **User Experience**: Automating query transformation lowers the burden on users to perfectly formulate their questions, making the system more accessible.
 
----
-# Condition
+## Condition
 
 This pattern is most effective when:
 
@@ -23,14 +24,13 @@ This pattern is most effective when:
 2. **The domain involves complex or specialized language**. Domain-specific jargon \(e.g., medical, legal, or technical terms\) often confuses general-purpose language models and retrieval systems.
 3. **Long-tail or unique queries** are common. When users ask rare, verbose, or unusual questions, naive retrieval pipelines may fail to capture relevant documents.
 
-**Example Use Cases**
+Do not use this pattern when:
 
-- **E-commerce Search**: A user searches “shoes that are comfy and pinkish for running.” A query transformation module could rewrite this as “comfortable pink running shoes” to improve retrieval.
-- **Technical Documentation**: A user queries “Set up K8, how?” The system might rewrite “K8” as “Kubernetes” to match the correct documentation.
-- **Legal or Academic Research**: A user asks “LLM requirements for my career.” Query transformation can clarify whether the user is referring to a Master of Laws or Large Language Model courses, pulling in the correct references.
+- User queries are already clear and consistently retrieve high-quality results.
+- The application cannot tolerate additional latency from transformation steps.
+- Domain policies do not allow automated rewriting of sensitive user prompts.
 
----
-# Solution
+## Solution
 
 **Core Idea**
 
@@ -102,3 +102,23 @@ Instead of sending the user’s original query directly into a retrieval system,
 - **Scalable Adaptation**: Once the transformation pipeline is in place, it can easily adapt to new domains or specialized vocabularies with minimal user effort.
 
 By applying Query Transformation, RAG and Gen AI systems become more resilient to the vast range of how humans actually ask questions. This pattern helps bridge the gap between human language and machine retrieval, ultimately delivering more accurate, context-rich responses.
+
+## Example
+
+- E-commerce search: "shoes that are comfy and pinkish for running" is rewritten to "comfortable pink running shoes" before retrieval.
+- Technical documentation: "Set up K8, how?" is rewritten with standardized terminology ("Kubernetes setup") to match indexed docs.
+- Legal or academic research: "LLM requirements for my career" is rewritten into two clarified variants, then retrieval ranks results by user context.
+
+## Tradeoffs
+
+- Gain: improved retrieval precision for ambiguous or poorly phrased queries.
+- Gain: reduced user burden to formulate perfect search prompts.
+- Cost: additional token usage and system latency for rewrite/generation steps.
+- Cost: more pipeline complexity when combining rewrite, HyDE, and step-back methods.
+
+## Failure Modes
+
+- Rewrites can alter intent and retrieve incorrect evidence.
+- HyDE can generate overly generic synthetic text that weakens matching.
+- Step-back prompting can over-broaden retrieval and reduce precision.
+- Lack of evaluation loops can hide regressions in transformed-query quality.

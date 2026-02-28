@@ -1,6 +1,6 @@
-# Expansion
+# Query Expansion Pattern
 
-# Problem
+## Problem
 
 When a system relies directly on a user’s original query \(as in a basic “naive RAG” setup\), two major issues often arise:
 
@@ -17,7 +17,7 @@ Without addressing these challenges, retrieval systems can underperform by:
 
 Hence, **Query Expansion** is necessary to ensure higher retrieval accuracy, reduce ambiguity, and preserve essential context.
 
-# Condition
+## Condition
 
 **Best Suited When:**
 
@@ -28,13 +28,13 @@ Hence, **Query Expansion** is necessary to ensure higher retrieval accuracy, red
 - **Unclear or Ambiguous User Input**
 - If the query is very short or ambiguously worded, generating multiple expanded variants can help refine the search space.
 
-**Example Use Cases**
+Do not use this pattern when:
 
-1. **Medical Question Answering**: A query about a condition like “effects of drug X on pregnant women” might need expansions \(“drug X contraindications,” “drug X pregnancy guidelines,” “drug X side effects,” etc.\).
-2. **Legal Document Retrieval**: A query mentioning “LLM” could be expanded into both “Large Language Model” and “Master of Laws” to see which yields more relevant results in a legal context.
-3. **Technical Troubleshooting**: A query like “Why is my code failing?” can be expanded to consider different dimensions: environment setup, syntax errors, library incompatibility, etc.
+- The query is already precise and short enough that expansion adds little value.
+- Latency or cost budgets are strict and cannot support multiple query generations.
+- Expansion quality cannot be validated, creating risk of topic drift.
 
-# Solution
+## Solution
 
 **Core Idea**
 
@@ -103,3 +103,22 @@ Below is a high-level diagram illustrating how Query Expansion works:
 - Sub-query decomposition enables large problems to be tackled in smaller, more manageable pieces, improving overall clarity and correctness.
 
 By employing **Query Expansion**, retrieval-augmented generation \(RAG\) or any GenAI system can handle ambiguous, complex, or specialized questions more effectively—leading to more relevant, accurate, and context-rich answers.
+
+## Example
+
+- Medical question answering: a query on "effects of drug X on pregnant women" is expanded into related variants such as contraindications, pregnancy guidelines, and side effects before retrieval.
+- Legal document retrieval: "LLM requirements" is expanded into both "Large Language Model" and "Master of Laws" interpretations, then ranked by relevance in the legal corpus.
+- Technical troubleshooting: "Why is my code failing?" is decomposed into environment, syntax, and dependency-focused sub-queries and merged after retrieval.
+
+## Tradeoffs
+
+- Gain: broader coverage of relevant documents and reduced ambiguity.
+- Gain: better handling of domain jargon and abbreviations.
+- Cost: higher inference and retrieval cost due to multiple generated queries.
+- Cost: added orchestration complexity for ranking and merging results.
+
+## Failure Modes
+
+- Over-expansion introduces tangential queries and noisy retrieval.
+- Poor sub-query generation drifts away from user intent.
+- Result aggregation can over-weight redundant sub-queries and bias final answers.
