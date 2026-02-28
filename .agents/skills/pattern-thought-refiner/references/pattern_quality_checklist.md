@@ -7,7 +7,7 @@ Use this checklist before finalizing any pattern.
 - `Problem`: Names one concrete pain point and who experiences it.
 - `Condition`: Includes both "use when" and "do not use when" conditions.
 - `Solution`: Gives procedural steps with execution detail.
-- `Example`: Includes enough specifics (context, steps, outcome) for implementation.
+- `Example`: Includes at least one concrete example relevant to the pattern.
 
 ## Precision Rules
 

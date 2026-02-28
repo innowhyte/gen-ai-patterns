@@ -33,7 +33,7 @@ Execute this workflow in order.
    - Problem scope and failure symptom
    - Trigger conditions and explicit non-conditions
    - Step-by-step solution mechanics
-   - One implementation-grade example
+   - One concrete example
 4. If the user gives a generic answer, ask for measurable details.
 
 ## 5) Enforce No-Hallucination Drafting
@@ -58,7 +58,7 @@ Execute this workflow in order.
 1. Validate required template sections are present and non-empty.
 2. Confirm `Condition` includes both when-to-use and when-not-to-use.
 3. Confirm `Solution` is procedural, not conceptual marketing text.
-4. Confirm `Example` is specific enough to implement.
+4. Confirm `Example` is concrete and relevant to the pattern.
 5. Confirm optional sections are included only when concrete.
 
 ## 8) Deliver Output

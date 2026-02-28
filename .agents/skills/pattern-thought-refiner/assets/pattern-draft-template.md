@@ -20,15 +20,7 @@ Do not use when:
 
 ## Example
 
-Context:
-- [NEEDS USER INPUT]
-
-Execution:
-1. [NEEDS USER INPUT]
-2. [NEEDS USER INPUT]
-
-Outcome:
-- [NEEDS USER INPUT]
+[NEEDS USER INPUT: Provide one or more concrete examples.]
 
 ## Tradeoffs (Recommended)
 
