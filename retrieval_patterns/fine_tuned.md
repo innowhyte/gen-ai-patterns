@@ -1,6 +1,6 @@
 # Fine-Tuned Retriever
 
-# Problem
+## Problem
 
 Modern retrieval-augmented generation \(RAG\) pipelines often rely on general-purpose retrievers that have been pre-trained on broad, open-domain corpora. However, when faced with domain-specific content—for instance, in specialized fields like healthcare, law, financial services, or internal corporate data—the general retriever may not capture the nuances of the specialized vocabulary or structures. This results in:
 
@@ -12,21 +12,20 @@ Modern retrieval-augmented generation \(RAG\) pipelines often rely on general-pu
 
 Without domain adaptation, the RAG system may repeatedly surface irrelevant chunks or fail to capture critical domain-specific context. This can degrade the trustworthiness and overall performance of the system. Fine-tuning ensures that the retriever aligns more closely to the specialized domain corpus, leading to better retrieval precision and recall.
 
-# Condition
+## Condition
 
 This pattern is suitable when:
 
 1. **The domain is highly specialized** and contains unique terminology not commonly found in public or broad-domain datasets \(e.g., medical or legal jargon, internal corporate abbreviations, etc.\).
 2. **High retrieval accuracy is paramount**, especially in regulated or high-stakes environments where incorrect context can lead to serious errors.
-3. **You have access to a labeled or partially labeled dataset** \(or the ability to generate supervisory signals\) to guide the fine-tuning process.
+3. **You have access to a labeled or partially labeled dataset** to guide the fine-tuning process.
 
-### Example Use Cases
+Do not use this pattern when:
 
-- **Healthcare Knowledge Bases**: Retrieving specialized clinical documents where medical acronyms and rare diseases are heavily referenced.
-- **Legal Document Review**: Searching for relevant case laws or legal precedents in a private repository that uses specialized or archaic legal terms.
-- **Enterprise Intranet**: Where internal project code names, acronyms, or domain-specific product references are unknown to a general retriever.
+- A strong general retriever already meets quality targets for the domain.
+- Training and maintenance budgets cannot support periodic adaptation.
 
-# Solution
+## Solution
 
 **Overview**
 
@@ -45,7 +44,7 @@ Below is a conceptual diagram illustrating the core idea:
   │ Fine-Tuning Dataset │
   └─────────┬───────────┘
             │
-            │ \(supervised or LM-generated signals\)
+            │ \(supervised\)
             ▼
   ┌─────────────────────┐
   │ Fine-Tuned Retriever│
@@ -55,6 +54,7 @@ Below is a conceptual diagram illustrating the core idea:
             ▼
       Retrieval Process
 ```
+
 ### Key Approaches
 
 1. **Supervised Fine-Tuning \(SFT\)**
@@ -63,8 +63,8 @@ Below is a conceptual diagram illustrating the core idea:
     - **Benefit**: Directly optimizes retrieval quality on known relevant samples.
 2. **LM-Supervised Retriever \(LSR\)**
     - **What**: Relies on an LLM’s output probability as a supervision signal instead of manual or explicitly labeled pairs.
-    - **How**: Scores documents by how well they lead the LLM to produce a “ground truth” answer.
-    - **Benefit**: Allows semi-supervised or weakly supervised approach without needing large amounts of human-labeled data.
+    - **How**: Optimizes retrieval so selected documents increase the LM’s likelihood \(or reduce perplexity\) for the target continuation, without requiring explicit query-document relevance labels.
+    - **Benefit**: Allows weakly supervised retriever training without needing large amounts of human-labeled retrieval data.
 3. **Adapter-Based Fine-Tuning**
     - **What**: Inserts a lightweight adapter module into a large pre-trained retriever, only fine-tuning the adapter parameters.
     - **How**: Retains most of the original retriever’s parameters, drastically reducing computational overhead.
@@ -88,27 +88,27 @@ Below is a conceptual diagram illustrating the core idea:
 6. **Security and Privacy**
     - If data is proprietary, ensure that fine-tuning processes and data usage comply with privacy guidelines.
 
-### Analysis from Different Aspects
+## Example
 
-- **Cost**:
-    - Fine-tuning large models can be expensive. Adapter-based methods or partial parameter tuning can reduce costs significantly.
-    - LSR can save on labeling costs but might require careful calibration of the LM’s supervision signals.
-- **Complexity**:
-    - Full fine-tuning adds complexity in managing model checkpoints, hyperparameters, and training loops.
-    - Adapters and partial fine-tuning are comparatively simpler but require additional modules and some design for integration.
-- **Evaluation**:
-    - Must conduct domain-specific relevance evaluation, which may be time-consuming but is necessary to confirm improvements.
-    - Online testing or a small-scale A/B test can be effective if user-driven retrieval is part of the system.
-- **Scalability**:
-    - Fine-tuned models may need to be re-deployed frequently if domain data changes.
-    - Cloud-based MLOps can help in orchestration and scaling of retrievers across large volumes of data.
+Example use cases:
 
-### Unique Benefits
+- **Healthcare Knowledge Bases**: Retrieving specialized clinical documents where medical acronyms and rare diseases are heavily referenced.
+- **Legal Document Review**: Searching for relevant case laws or legal precedents in a private repository that uses specialized or archaic legal terms.
+- **Enterprise Intranet**: Where internal project code names, acronyms, or domain-specific product references are unknown to a general retriever.
 
-- **Enhanced Relevance**: Achieves higher precision and recall within niche or specialized domains.
-- **Reduced Hallucination**: By presenting more accurate and context-rich chunks, you reduce the likelihood of the RAG component “guessing” missing details.
-- **Adaptive and Evolving**: The retriever can be continuously updated or augmented with adapters as the domain changes.
-- **Leverage Existing LLM Insights**: Methods like LSR harness the LLM’s generative capability to guide retrieval alignment when labeled data is scarce.
+For a healthcare knowledge base, a team starts with a general retriever and fine-tunes it on query-document pairs built from internal clinical QA logs. During evaluation, recall@10 is measured on a held-out set of medical acronym-heavy questions. Compared with the baseline retriever, the fine-tuned model surfaces more guideline-specific chunks for downstream RAG answers.
 
-In summary, Fine-Tuned Retrieval addresses the mismatch problem between general-purpose retrievers and specialized, proprietary domains by adapting the retrieval mechanism—either through direct supervised approaches, leveraging LM outputs, or using adapter modules—to ensure that relevant chunks are accurately surfaced for downstream RAG tasks.
+## Tradeoffs
 
+- Gain: higher in-domain relevance and better handling of specialized terminology.
+- Gain: reduced downstream hallucination risk from more accurate retrieved context.
+- Gain: adapter-based methods can improve domain fit with lower training overhead than full fine-tuning.
+- Cost: full or frequent fine-tuning can be expensive in compute, MLOps complexity, and maintenance cycles.
+- Cost: weak supervision methods \(such as LSR\) reduce labeling effort but require calibration and monitoring.
+
+## Failure Modes
+
+- Overfitting to narrow training data harms generalization to new domain phrasing.
+- Poorly curated supervision signals reinforce irrelevant retrieval behavior.
+- Domain drift \(new terminology, policies, product names\) degrades retrieval if re-tuning is not scheduled.
+- Privacy or compliance violations occur if proprietary data is used in training without proper controls.

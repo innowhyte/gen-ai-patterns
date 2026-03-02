@@ -1,6 +1,6 @@
 # Hybrid Retrieval
 
-# Problem
+## Problem
 
 In Retrieval-Augmented Generation \(RAG\) applications, queries can vary widely in their complexity and domain specificity. Some queries might benefit from sparse retrieval methods \(like BM25\), particularly when dealing with rare or domain-specific terms. Others might require a more robust semantic understanding, which dense embeddings provide. Relying solely on either sparse or dense retrieval can lead to suboptimal performance:
 
@@ -13,26 +13,23 @@ Without a solution that combines the strengths of both methods, your system migh
 - Overload compute and storage resources by heavily using large dense models.
 - Sacrifice retrieval accuracy in ambiguous or complex domains.
 
-# Condition
+## Condition
 
-This pattern is best applied in scenarios where:
+This pattern is most useful in scenarios where:
 
 1. **High Retrieval Accuracy is Critical**: You need both precision \(exact matching\) and recall \(semantic nuance\), such as in specialized medical or legal domains.
 2. **Diverse Query Types**: Some queries might be purely keyword-oriented, while others need deep semantic understanding.
-3. **Scalable Infrastructure**: You have the capacity to run and maintain both retrieval systems.
 
-**Example Use Cases**:
+Do not use this pattern when:
 
-- **Customer Support Knowledge Base**: Users with domain knowledge may use specific jargon, while novices might ask more conceptual questions.
-- **Academic Search Engines**: Queries may focus on specialized terms \(e.g., chemical compounds\) or broad topics requiring semantic understanding.
-- **E-commerce Search**: Shoppers may look up exact brand names or search with synonyms and descriptions.
+- The corpus is small and lexical matching already satisfies quality requirements.
 
-# Solution
+## Solution
 
 **Core Idea**: Combine sparse and dense retrieval methods in a layered or parallel fashion. A high-level workflow could look like this:
 
 1. **Sparse Retrieval Phase**: Use a statistical or lexical approach \(e.g., BM25\) to handle keyword-centric or rare-entity queries.
-2. **Dense Retrieval Phase**: Leverage an LLM-based or PLM-based embedding model to handle complex semantic queries.
+2. **Dense Retrieval Phase**: Leverage an embedding model to handle complex semantic queries.
 3. **Hybrid Fusion**: Merge or rerank the results from both retrievers. Various techniques can be used, such as simple score summation or more sophisticated ensemble methods.
 
 ```
@@ -43,19 +40,34 @@ graph LR
     C --> D\[Fusion / Reranking\]
     D --> E\[Final Retrieved Chunks\]
 ```
+
 ### Important Considerations
 
 1. **Performance Evaluation**: Evaluate each component \(sparse, dense, fusion\) independently and in combination. Track precision, recall, and latency metrics.
 2. **Scalability**: As the corpus grows, ensure that both retrieval methods remain performant. Index building and query latency need monitoring.
-3. **Zero-shot Robustness**: Sparse methods can capture rare terms better, complementing dense embeddings when faced with low-frequency entities.
+3. **Rare-Term Robustness**: Sparse methods can capture rare terms better, complementing dense embeddings when faced with low-frequency entities.
 4. **Result Fusion Strategy**: The approach to combine or rerank results greatly impacts final retrieval effectiveness. Experiment with weighting strategies or learning-to-rank models.
 
-### Unique Benefits
+## Example
 
-- **Enhanced Coverage**: Addresses the weaknesses of purely sparse or purely dense systems.
-- **Improved Robustness**: With two distinct embeddings, you handle both exact lexical matches and deep semantic matches.
-- **Customizable**: Can fine-tune or swap out either retrieval method independently.
-- **Scalable by Design**: Fallback to sparse retrieval for large corpora or specialized queries.
+Example use cases:
 
-In summary, Hybrid Retrieval merges the strengths of sparse and dense retrievers for improved coverage, accuracy, and adaptability. By carefully balancing cost, complexity, and performance considerations, it becomes a powerful pattern for real-world RAG systems seeking high-quality retrieval results.
+- **Customer Support Knowledge Base**: Users with domain knowledge may use specific jargon, while novices might ask more conceptual questions.
+- **Academic Search Engines**: Queries may focus on specialized terms \(e.g., chemical compounds\) or broad topics requiring semantic understanding.
+- **E-commerce Search**: Shoppers may look up exact brand names or search with synonyms and descriptions.
 
+In a customer support knowledge base, a user asks: "Error E042 after billing migration." Sparse retrieval surfaces documents containing the exact error code and migration identifier, while dense retrieval adds semantically related troubleshooting guides that do not contain the exact code string. A fusion step reranks combined results so the final context includes both exact operational runbooks and broader resolution guidance.
+
+## Tradeoffs
+
+- Gain: enhanced coverage by combining exact lexical matching and semantic similarity.
+- Gain: improved robustness for mixed query styles \(rare identifiers plus conceptual language\).
+- Gain: flexibility to tune sparse and dense components independently.
+- Cost: additional complexity for dual indexes and fusion logic.
+- Cost: higher query-time latency and compute usage if not carefully optimized.
+
+## Failure Modes
+
+- Poor fusion weighting over-prioritizes one retriever and suppresses useful results from the other.
+- Index drift between sparse and dense stores causes inconsistent or stale retrieval behavior.
+- Domain-specific rare terms still get missed if dense reranking dominates final ordering.
