@@ -18,6 +18,9 @@ This work is also inspired by the POSA (Pattern-Oriented Software Architecture) 
 
 ## Current pattern groups
 
+- Chunk Storage
+  - [Graph Index](chunk_storage_patterns/graph_index.md)
+  - [Hieracrchical Index](chunk_storage_patterns/hieracrchical_index.md)
 - Chunking
   - [Metadata Attachment](chunking_patterns/metadata_attachment.md)
   - [Sliding Window](chunking_patterns/sliding_window.md)
@@ -29,6 +32,22 @@ This work is also inspired by the POSA (Pattern-Oriented Software Architecture) 
   - [User as Judge](evaluation_patterns/user_as_a_judge.md)
 - Extraction
   - [Long Document Structured Extraction](extraction_patterns/long_document_structured_extraction.md)
+- Orchestration
+  - [Branching](orchestration_patterns/branching.md)
+  - [Fusion](orchestration_patterns/fusion.md)
+  - [Linear](orchestration_patterns/linear.md)
+  - [Looping](orchestration_patterns/looping.md)
+  - [Routing](orchestration_patterns/routing.md)
+- Post Retrieval
+  - [Compression](post_retrieval_patterns/compression.md)
+  - [Reranking](post_retrieval_patterns/reranking.md)
+- Query Optimization
+  - [Construction](query_optimization_patterns/construction.md)
+  - [Expansion](query_optimization_patterns/expansion.md)
+  - [Transformation](query_optimization_patterns/transformation.md)
+- Retrieval
+  - [Fine Tuned](retrieval_patterns/fine_tuned.md)
+  - [Hybrid](retrieval_patterns/hybrid.md)
 
 ## How to use this repo
 
