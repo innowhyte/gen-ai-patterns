@@ -25,6 +25,12 @@ This work is also inspired by the POSA (Pattern-Oriented Software Architecture) 
   - [Metadata Attachment](chunking_patterns/metadata_attachment.md)
   - [Sliding Window](chunking_patterns/sliding_window.md)
   - [Small-to-Big](chunking_patterns/small_to_big.md)
+- Context
+  - [Assembly](context_patterns/assembly.md)
+  - [Distribution](context_patterns/distribution.md)
+  - [Grounding](context_patterns/grounding.md)
+  - [Integrity](context_patterns/integrity.md)
+  - [Sustenance](context_patterns/sustenance.md)
 - Evaluation
   - [Human as Judge](evaluation_patterns/human_as_a_judge.md)
   - [Model as Judge](evaluation_patterns/model_as_a_judge.md)
