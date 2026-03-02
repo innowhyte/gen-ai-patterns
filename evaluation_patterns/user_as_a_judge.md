@@ -17,13 +17,13 @@ The **User As Judge** pattern allows direct user feedback to guide AI improvemen
 
 This pattern is best suited when:
 
-- The AI-generated outputs are **directly consumed by end-users** \(e.g., chatbots, recommendation systems, AI-generated content platforms\).
+- The AI-generated outputs are **directly consumed by end-users** (e.g., chatbots, recommendation systems, AI-generated content platforms).
 - Evaluation requires **personalization** and **adaptive learning** based on user preferences.
 - Continuous **user feedback loops** can be leveraged for ongoing model improvement.
 - Tasks involve **high subjectivity**, such as:
-    - Personalized AI-generated recommendations \(e.g., music, movie suggestions\).
+    - Personalized AI-generated recommendations (e.g., music, movie suggestions).
     - Chatbot interactions and response satisfaction.
-    - AI-assisted content generation \(e.g., design tools, writing assistants\).
+    - AI-assisted content generation (e.g., design tools, writing assistants).
     - UX and usability testing for AI-powered applications.
 
 However, this pattern **may not be ideal** for applications requiring absolute correctness, such as legal, medical, or financial AI systems, where expert judgment is necessary.
@@ -34,7 +34,7 @@ The **User As Judge** pattern incorporates direct user feedback into the AI eval
 
 ### Key Steps in Applying the Pattern
 
-1. **Define Feedback Mechanisms:** Establish how users will provide input \(e.g., thumbs up/down, star ratings, qualitative reviews, implicit behavior tracking\).
+1. **Define Feedback Mechanisms:** Establish how users will provide input (e.g., thumbs up/down, star ratings, qualitative reviews, implicit behavior tracking).
 2. **Incentivize Participation:** Encourage users to provide feedback through rewards, gamification, or improved personalization.
 3. **Aggregate and Analyze Feedback:** Collect structured and unstructured user responses, filtering noise and bias where necessary.
 4. **Adjust AI Models Based on Feedback:** Use reinforcement learning, fine-tuning, or weighted algorithms to adapt AI behavior over time.

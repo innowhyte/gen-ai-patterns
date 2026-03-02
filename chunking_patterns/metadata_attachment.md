@@ -2,11 +2,11 @@
 
 ## Problem
 
-When dealing with large collections of documents in Retrieval-Augmented Generation \(RAG\) applications, simply breaking content into smaller chunks and embedding them for semantic retrieval often leads to an unmanageably large search space. Without a mechanism to filter or narrow down which chunks to retrieve, the system may return irrelevant results or waste time ranking too many candidate chunks. This problem is amplified when:
+When dealing with large collections of documents in Retrieval-Augmented Generation (RAG) applications, simply breaking content into smaller chunks and embedding them for semantic retrieval often leads to an unmanageably large search space. Without a mechanism to filter or narrow down which chunks to retrieve, the system may return irrelevant results or waste time ranking too many candidate chunks. This problem is amplified when:
 
 - The data source spans multiple domains, authors, or time periods.
-- Queries need to be scoped to specific attributes \(e.g., date range, author, or file type\).
-- Users require precise filtering \(e.g., “only show results from last month’s technical reports”\).
+- Queries need to be scoped to specific attributes (e.g., date range, author, or file type).
+- Users require precise filtering (e.g., “only show results from last month’s technical reports”).
 
 **Why this pattern is necessary**
 
@@ -18,16 +18,16 @@ When dealing with large collections of documents in Retrieval-Augmented Generati
 
 This pattern is best suited when:
 
-1. **You have well-defined attributes** \(e.g., author, document type, publication date, department, tags\) that are important for filtering or sorting results.
+1. **You have well-defined attributes** (e.g., author, document type, publication date, department, tags) that are important for filtering or sorting results.
 2. **Query patterns frequently involve filtering**. For example, users often ask for documents authored by a specific person or within a particular time range.
-3. **Your data has varied sources**: logs, emails, wiki pages, PDFs, etc., where each format has different metadata fields \(e.g., page number, email sender, version number\).
+3. **Your data has varied sources**: logs, emails, wiki pages, PDFs, etc., where each format has different metadata fields (e.g., page number, email sender, version number).
 4. **A large knowledge base** where you need to reduce the search space quickly.
 
 **Example Use Cases**
 
 - **Enterprise Knowledge Base**: Employees frequently query internal policies but often need to filter by department or version.
 - **Research Papers Repository**: Researchers or students filter by publication date, journal name, or author.
-- **E-commerce Product Info**: Queries about specific categories or brands require chunk-level filtering \(e.g., product manuals, shipping instructions\).
+- **E-commerce Product Info**: Queries about specific categories or brands require chunk-level filtering (e.g., product manuals, shipping instructions).
 
 ## Solution
 
@@ -37,34 +37,34 @@ Below is a conceptual diagram to illustrate the approach:
 
 ```
    ┌───────────────────────────┐
-   │   Original Document\(s\)    │
+   │   Original Document(s)    │
    └─────────┬─────────────────┘
              │
-             │ \(Segment the document into chunks\)
+             │ (Segment the document into chunks)
              │
    ┌───────────────────────────┐
    │         Chunker           │
    └─────────┬─────────────────┘
              │
-             │ \(Attach relevant metadata\)
+             │ (Attach relevant metadata)
              │
    ┌───────────────────────────┐
    │ Chunk \+ Metadata Storage  │
-   │  \(Vector DB or Index\)     │
+   │  (Vector DB or Index)     │
    └─────────┬─────────────────┘
              │
-             │ \(Filtered \+ semantic search\)
+             │ (Filtered \+ semantic search)
              │
    ┌───────────────────────────┐
    │    RAG Retrieval Layer    │
    └───────────────────────────┘
 ```
-1. **Chunking**: Break documents into coherent segments based on your chunking strategy \(e.g., section headings, page boundaries, or text length\).
+1. **Chunking**: Break documents into coherent segments based on your chunking strategy (e.g., section headings, page boundaries, or text length).
 2. **Identify Metadata**: Based on the business use case and common query patterns, determine which metadata fields are most critical. Examples include:
     - **Document-level**: Title, author, creation date, department.
     - **Chunk-level**: Page number, heading, summary, relevant keywords.
 3. **Attach Metadata**: Store each chunk in a vector database or index along with its metadata.
-4. **Query & Retrieval**: When a user makes a request, the system first applies metadata filters \(e.g., “author = John Doe”\) to shrink the search space. Then it runs semantic similarity or vector-based ranking only on the remaining subset, resulting in more focused results.
+4. **Query & Retrieval**: When a user makes a request, the system first applies metadata filters (e.g., “author = John Doe”) to shrink the search space. Then it runs semantic similarity or vector-based ranking only on the remaining subset, resulting in more focused results.
 
 ### Important Considerations When Applying This Pattern
 
@@ -73,7 +73,7 @@ Below is a conceptual diagram to illustrate the approach:
     - **Storage Cost**: More metadata fields = more storage overhead and potential indexing complexity.
     - **Complexity**: Each additional field adds maintenance overhead to ensure correctness and updates.
 - **Implementation Details**:
-    - **Indexing**: Choose a vector database or search engine that supports metadata filters \(e.g., filtering by numeric, boolean, or categorical fields\).
+    - **Indexing**: Choose a vector database or search engine that supports metadata filters (e.g., filtering by numeric, boolean, or categorical fields).
     - **Data Consistency**: Keep metadata synchronized with the content of each chunk. If you update a document’s author or summary, ensure all related chunks reflect the change.
 - **Evaluation**:
     - **Search Quality**: Evaluate how well the metadata-based filtering reduces false positives.

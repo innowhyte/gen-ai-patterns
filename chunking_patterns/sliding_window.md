@@ -2,7 +2,7 @@
 
 ## Problem
 
-In RAG applications, documents or text can be too large to fit into a language model’s context window. Splitting the text into chunks \(also referred to as segments or windows\) is critical to ensure the language model receives manageable input sizes and relevant context. However, naively dividing the text can result in cutting sentences, words, or complete thoughts in half. This can disrupt comprehension, lead to poor retrieval quality, or omit critical information.
+In RAG applications, documents or text can be too large to fit into a language model’s context window. Splitting the text into chunks (also referred to as segments or windows) is critical to ensure the language model receives manageable input sizes and relevant context. However, naively dividing the text can result in cutting sentences, words, or complete thoughts in half. This can disrupt comprehension, lead to poor retrieval quality, or omit critical information.
 
 **Sliding Window** chunking addresses these issues by:
 
@@ -12,7 +12,7 @@ In RAG applications, documents or text can be too large to fit into a language m
 ### Potential Issues Without It
 
 - **Loss of Context:** Without overlapping windows, large portions of text can be prematurely cut off, leading to incomplete information in each chunk.
-- **Disconnected Chunks:** Cutting at arbitrary boundaries \(e.g., strictly fixed character counts\) may break semantic units and degrade the model’s understanding of the content.
+- **Disconnected Chunks:** Cutting at arbitrary boundaries (e.g., strictly fixed character counts) may break semantic units and degrade the model’s understanding of the content.
 
 ## Condition
 
@@ -43,8 +43,8 @@ In RAG applications, documents or text can be too large to fit into a language m
     - **By Characters:** Count characters in the text and slice them into segments of length `N`.
     - **By Tokens:** Tokenize the text first, then slice based on a fixed token count `T`.
 2. **Overlap Windows**
-    - Define an overlap `O` \(character- or token-based\).
-    - For each chunk, move the window forward by `\(N - O\)` or `\(T - O\)` respectively.
+    - Define an overlap `O` (character- or token-based).
+    - For each chunk, move the window forward by `(N - O)` or `(T - O)` respectively.
     - This overlap helps capture ideas that straddle boundaries.
 3. **Generate Chunks for Downstream Use**
     - Each chunk becomes an input unit for retrieval indexing or direct LLM processing.
@@ -76,10 +76,10 @@ Overlap: O characters
 
 ### Analysis from Different Aspects
 
-- **Cost \(Storage and Retrieval\):**
+- **Cost (Storage and Retrieval):**
     - Overlapping chunks increase the total number of chunks, which in turn increases indexing/storage costs and retrieval overhead.
-- **Evaluation \(Quality\):**
-    - Overlaps help preserve continuity but do not fully ensure semantic coherence. You may still face challenges in tasks requiring deeper understanding \(e.g., summarization, Q&A\).
+- **Evaluation (Quality):**
+    - Overlaps help preserve continuity but do not fully ensure semantic coherence. You may still face challenges in tasks requiring deeper understanding (e.g., summarization, Q&A).
 - **Complexity:**
     - Technically straightforward: sliding a window and slicing.
     - The main additional complexity is if you choose token-based windows, as you have to integrate a tokenizer.
@@ -90,7 +90,7 @@ Overlap: O characters
     - Minimal engineering overhead—highly accessible, especially for initial data exploration or pilot RAG projects.
 - **Controlled Coverage:**
     - Overlap mitigates the risk of missing key segments that cross boundaries.
-- **Direct LLM Integration \(Token-based\):**
+- **Direct LLM Integration (Token-based):**
     - Directly aligns chunks with the LLM’s token limitations, making it predictable how many chunks can fit within the model’s context window.
 
 ---

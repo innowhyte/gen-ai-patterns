@@ -2,19 +2,19 @@
 
 ## Problem
 
-When building Retrieval-Augmented Generation \(RAG\) applications that integrate multiple data sources, it is often insufficient to rely solely on the user’s natural language query. Many relevant data sources, such as relational databases and graph databases, require specialized query languages \(e.g., SQL, Cypher\) to retrieve information efficiently.
+When building Retrieval-Augmented Generation (RAG) applications that integrate multiple data sources, it is often insufficient to rely solely on the user’s natural language query. Many relevant data sources, such as relational databases and graph databases, require specialized query languages (e.g., SQL, Cypher) to retrieve information efficiently.
 
 **Why this pattern is needed:**
 
-- **Diverse Data Types:** RAG applications increasingly need to access not only text data but also structured data \(tables, graphs, etc.\). Natural language queries must therefore be transformed into the appropriate structured query language.
-- **Complex Queries:** Simple keyword searches might not suffice when the user’s query is complex \(e.g., requiring joins in a relational database, or graph traversals in a knowledge graph\).
+- **Diverse Data Types:** RAG applications increasingly need to access not only text data but also structured data (tables, graphs, etc.). Natural language queries must therefore be transformed into the appropriate structured query language.
+- **Complex Queries:** Simple keyword searches might not suffice when the user’s query is complex (e.g., requiring joins in a relational database, or graph traversals in a knowledge graph).
 - **Optimization:** Converting a broad natural language query into a more precise structured query can dramatically reduce the volume of data retrieved, lowering computational costs and improving response times.
 
 **Potential issues without this pattern:**
 
 - **Inaccurate Retrieval:** Without query restructuring, you may fetch incomplete or irrelevant data, or perform inefficient broad text searches when a structured approach would be faster and more accurate.
-- **Increased Latency and Cost:** Relying on unoptimized queries \(e.g., full-text search against large datasets\) can lead to high latency and increased operational costs.
-- **Limited Query Expressiveness:** Many advanced query capabilities \(like aggregations, constraints, path traversals in a graph\) are lost if the system only accepts a single format \(natural language or naive keyword search\).
+- **Increased Latency and Cost:** Relying on unoptimized queries (e.g., full-text search against large datasets) can lead to high latency and increased operational costs.
+- **Limited Query Expressiveness:** Many advanced query capabilities (like aggregations, constraints, path traversals in a graph) are lost if the system only accepts a single format (natural language or naive keyword search).
 
 ## Condition
 
@@ -26,13 +26,13 @@ When building Retrieval-Augmented Generation \(RAG\) applications that integrate
 
 ## Solution
 
-**Core idea:** Transform and enrich the user’s natural language query into a structured query \(e.g., SQL, Cypher\) that accurately addresses the data source’s schema and leverages available metadata or semantic information.
+**Core idea:** Transform and enrich the user’s natural language query into a structured query (e.g., SQL, Cypher) that accurately addresses the data source’s schema and leverages available metadata or semantic information.
 
 Below is a conceptual diagram illustrating the process:
 
 ```
  ┌─────────────────┐      ┌─────────────────────────┐      ┌───────────────────┐
- │ User Query \(NL\) │  →   │ Query Construction Layer │  →   │ Data Source Query │
+ │ User Query (NL) │  →   │ Query Construction Layer │  →   │ Data Source Query │
  └─────────────────┘      └─────────────────────────┘      └───────────────────┘
           |                         |                               |
           v                         v                               v
@@ -42,7 +42,7 @@ Below is a conceptual diagram illustrating the process:
 ```
 1. **Parse & Interpret:** Use an LLM or specialized parser to understand user intent, identify constraints, and detect any specific relationships or aggregations needed.
 2. **Schema Mapping:** Map user query elements to schema elements—tables, columns, graph nodes, relationships, or metadata.
-3. **Query Generation:** Construct the target query \(SQL, Cypher, etc.\) leveraging known joins, filters, or graph paths. Possibly refine or optimize the query \(e.g., limit, offset, or indexing hints\).
+3. **Query Generation:** Construct the target query (SQL, Cypher, etc.) leveraging known joins, filters, or graph paths. Possibly refine or optimize the query (e.g., limit, offset, or indexing hints).
 4. **Execution & Retrieval:** Send the structured query to the respective data source, retrieve results, and feed them back into the RAG pipeline.
 
 ## Example
@@ -62,6 +62,6 @@ Below is a conceptual diagram illustrating the process:
 
 - **Schema Understanding:** You need a well-defined representation of the schema or ontology for the system to generate accurate queries.
 - **Query Validation:** Generated queries may be syntactically or semantically incorrect. Implement robust validation and error handling to avoid system failures.
-- **Performance & Cost:** Complex queries \(e.g., multiple joins, deep graph traversals\) can be expensive. Employ caching, indexing, or sub-queries to optimize retrieval.
+- **Performance & Cost:** Complex queries (e.g., multiple joins, deep graph traversals) can be expensive. Employ caching, indexing, or sub-queries to optimize retrieval.
 - **Security & Access Control:** Ensure that dynamically generated queries respect user permissions and do not expose sensitive data inadvertently.
 - **Scalability:** As the number of data sources grows, a modular or service-based approach to query generation keeps complexity in check.

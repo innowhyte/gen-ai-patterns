@@ -2,10 +2,10 @@
 
 ## Problem
 
-Retrieval-Augmented Generation \(RAG\) systems often rely on the user’s **original** query to fetch relevant documents. However, users’ queries can be:
+Retrieval-Augmented Generation (RAG) systems often rely on the user’s **original** query to fetch relevant documents. However, users’ queries can be:
 
 1. **Poorly worded or ambiguous**, causing retrieval to miss critical information.
-2. **Complex**, especially for domain-specific topics or specialized vocabulary \(e.g., “LLM” might mean “Large Language Model” or “Master of Laws”\).
+2. **Complex**, especially for domain-specific topics or specialized vocabulary (e.g., “LLM” might mean “Large Language Model” or “Master of Laws”).
 3. **Unstructured** with run-on sentences, extraneous details, or unclear objectives.
 
 Without a strategy to clean, simplify, or reframe queries, these issues can undermine retrieval effectiveness and lead to low-quality or irrelevant results. This not only hampers user satisfaction but can also waste computational resources on fruitless searches.
@@ -21,7 +21,7 @@ Without a strategy to clean, simplify, or reframe queries, these issues can unde
 This pattern is most effective when:
 
 1. **Users submit incomplete or ambiguous queries**. For instance, a question like “What should I do for LLM?” could refer to legal education or advanced AI models.
-2. **The domain involves complex or specialized language**. Domain-specific jargon \(e.g., medical, legal, or technical terms\) often confuses general-purpose language models and retrieval systems.
+2. **The domain involves complex or specialized language**. Domain-specific jargon (e.g., medical, legal, or technical terms) often confuses general-purpose language models and retrieval systems.
 3. **Long-tail or unique queries** are common. When users ask rare, verbose, or unusual questions, naive retrieval pipelines may fail to capture relevant documents.
 
 Do not use this pattern when:
@@ -48,7 +48,7 @@ Instead of sending the user’s original query directly into a retrieval system,
                                           v
                            \+-----------------------------\+
                            |    Enhanced / Rewritten     |
-                           |          Query\(ies\)         |
+                           |          Query(ies)         |
                            \+-----------------------------\+
                                           |
                                           v
@@ -67,14 +67,14 @@ Instead of sending the user’s original query directly into a retrieval system,
                               \+---------------------\+
 ```
 1. **Rewrite**
-    - The system prompts a language model \(or a specialized smaller model\) to rewrite the user query. It can simplify syntax, standardize terminology, and remove extraneous details.
+    - The system prompts a language model (or a specialized smaller model) to rewrite the user query. It can simplify syntax, standardize terminology, and remove extraneous details.
     - **Example**: Taobao’s query rewrite method, which improved recall for long-tail queries.
-2. **HyDE \(Hypothetical Document Embeddings\)**
+2. **HyDE (Hypothetical Document Embeddings)**
     - Instead of embedding the raw query, the system first generates a hypothetical answer or “document” that might address the user’s query. It then encodes that hypothetical answer for retrieval.
     - **Benefit**: This focuses on answer-to-answer similarity, bridging semantic gaps that might exist between how a question is phrased and how an answer is typically described.
     - **Reverse HyDE**: Alternatively, generate hypothetical queries from each retrieved chunk, refining or clarifying them for improved matching.
 3. **Step-back Prompting**
-    - Abstract the original query into a “higher-level” concept query \(a step-back question\) and retrieve with both the original and the step-back queries.
+    - Abstract the original query into a “higher-level” concept query (a step-back question) and retrieve with both the original and the step-back queries.
     - Combine the results for a more comprehensive final answer. This technique helps cast a wider net, especially if the user’s original question was overly detailed or narrow.
 
 ## Important Considerations
@@ -84,13 +84,13 @@ Instead of sending the user’s original query directly into a retrieval system,
     - Balancing the added cost with the improvement in retrieval quality is crucial.
 2. **Complexity**
     - Introducing multiple passes—such as rewriting or generating hypothetical documents—can complicate the system design.
-    - A simpler approach \(like a single rewrite\) may suffice in some applications, whereas HyDE or step-back prompting introduces additional steps.
+    - A simpler approach (like a single rewrite) may suffice in some applications, whereas HyDE or step-back prompting introduces additional steps.
 3. **Evaluation**
     - A/B testing transformed queries vs. direct queries helps assess improvements in retrieval recall and precision.
-    - Tracking user satisfaction metrics \(click-through rates, time on page, etc.\) offers more holistic feedback.
+    - Tracking user satisfaction metrics (click-through rates, time on page, etc.) offers more holistic feedback.
 4. **Domain-Specific Vocabulary**
     - Custom dictionaries or domain heuristics can further refine the rewriting process.
-    - For highly specialized fields \(e.g., medical\), smaller domain-specific models might handle rewriting tasks more accurately than a general LLM.
+    - For highly specialized fields (e.g., medical), smaller domain-specific models might handle rewriting tasks more accurately than a general LLM.
 5. **Security and Privacy**
     - Be mindful of transforming queries in domains with sensitive or regulated data. The rewriting process must not inadvertently expose private information or alter the user’s intent in a way that violates policy.
 

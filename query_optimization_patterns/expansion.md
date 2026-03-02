@@ -2,12 +2,12 @@
 
 ## Problem
 
-When a system relies directly on a user’s original query \(as in a basic “naive RAG” setup\), two major issues often arise:
+When a system relies directly on a user’s original query (as in a basic “naive RAG” setup), two major issues often arise:
 
 1. **Poorly Formulated Queries**
 2. Users might not know how to articulate their questions clearly and succinctly. This results in queries that are overly broad, ambiguous, or missing crucial details needed for accurate retrieval.
 3. **Language Ambiguity and Complexity**
-4. Specialized vocabulary and abbreviations \(e.g., “LLM” could mean either “Large Language Model” or a “Master of Laws”\) are not always interpreted correctly. Simple keyword matching or straightforward embeddings may miss the nuanced context needed for precision.
+4. Specialized vocabulary and abbreviations (e.g., “LLM” could mean either “Large Language Model” or a “Master of Laws”) are not always interpreted correctly. Simple keyword matching or straightforward embeddings may miss the nuanced context needed for precision.
 
 Without addressing these challenges, retrieval systems can underperform by:
 
@@ -46,7 +46,7 @@ Expand the user’s initial query into multiple related queries—either in para
 - **Sub-Query Decomposition**
 - Break down a complex query into smaller sub-queries. For example:
     1. Identify sub-problems or sub-topics within a larger question.
-    2. Retrieve information for each sub-problem individually, then combine or re-check the results for coherence \(often via a “Chain-of-Verification” to reduce hallucinations\).
+    2. Retrieve information for each sub-problem individually, then combine or re-check the results for coherence (often via a “Chain-of-Verification” to reduce hallucinations).
 
 Below is a high-level diagram illustrating how Query Expansion works:
 
@@ -78,7 +78,7 @@ Below is a high-level diagram illustrating how Query Expansion works:
 
 1. **Cost and Performance**
     - Generating multiple queries increases the number of LLM calls, potentially raising inference costs and latency.
-    - Additional retrieval operations \(e.g., searching the knowledge base multiple times\) also add overhead.
+    - Additional retrieval operations (e.g., searching the knowledge base multiple times) also add overhead.
 2. **Complexity**
     - Managing many parallel queries requires careful orchestration.
     - Merging or re-ranking the results can be non-trivial, especially when sub-queries overlap.
@@ -87,9 +87,9 @@ Below is a high-level diagram illustrating how Query Expansion works:
     - Metrics like retrieval precision/recall or end-to-end question-answering quality are typically used.
 4. **Maintaining User Intent**
     - Over-expansion can dilute the original question or introduce tangential content.
-    - Use weighting and verification \(e.g., post-filtering by the original query\) to ensure expansions remain relevant.
+    - Use weighting and verification (e.g., post-filtering by the original query) to ensure expansions remain relevant.
 5. **Hallucination Reduction**
-    - Systems like Chain-of-Verification \(CoVe\) can validate expansions and final answers, reducing the risk of generating spurious content.
+    - Systems like Chain-of-Verification (CoVe) can validate expansions and final answers, reducing the risk of generating spurious content.
 
 ### Unique Benefits
 
@@ -102,7 +102,7 @@ Below is a high-level diagram illustrating how Query Expansion works:
 - **Scalable for Complex Problems**
 - Sub-query decomposition enables large problems to be tackled in smaller, more manageable pieces, improving overall clarity and correctness.
 
-By employing **Query Expansion**, retrieval-augmented generation \(RAG\) or any GenAI system can handle ambiguous, complex, or specialized questions more effectively—leading to more relevant, accurate, and context-rich answers.
+By employing **Query Expansion**, retrieval-augmented generation (RAG) or any GenAI system can handle ambiguous, complex, or specialized questions more effectively—leading to more relevant, accurate, and context-rich answers.
 
 ## Example
 

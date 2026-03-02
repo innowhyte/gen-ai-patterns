@@ -42,7 +42,7 @@ The **Human As Judge** pattern involves structured human evaluation, either thro
 
 Testing AI-generated medical summaries:
 
-For an AI system that generates medical summaries, human judges \(such as doctors or medical researchers\) assess:
+For an AI system that generates medical summaries, human judges (such as doctors or medical researchers) assess:
 
 - **Accuracy:** Does the summary correctly represent patient data and medical conditions?
 - **Clarity:** Is the summary understandable to a non-expert or a medical practitioner?

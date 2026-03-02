@@ -34,9 +34,9 @@ The **LLM As Judge** pattern uses a pre-trained language model to evaluate AI-ge
 
 ### Key Steps in Applying the Pattern
 
-1. **Define Evaluation Criteria:** Establish clear parameters for quality assessment \(e.g., coherence, factual accuracy, readability\).
+1. **Define Evaluation Criteria:** Establish clear parameters for quality assessment (e.g., coherence, factual accuracy, readability).
 2. **Prompt the LLM for Evaluation:** Use carefully crafted prompts to instruct the LLM to assess the output based on the predefined criteria.
-3. **Score or Classify Responses:** The LLM can return a numerical score, a categorical rating \(e.g., "Good" or "Needs Improvement"\), or even a justification for its assessment.
+3. **Score or Classify Responses:** The LLM can return a numerical score, a categorical rating (e.g., "Good" or "Needs Improvement"), or even a justification for its assessment.
 4. **Benchmark with Human Evaluation:** Periodically compare LLM judgments with human scores to validate consistency.
 5. **Refine and Fine-Tune:** Adjust prompts and criteria to align the LLM’s evaluation with domain-specific requirements.
 

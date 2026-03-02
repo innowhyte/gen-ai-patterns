@@ -19,7 +19,7 @@ This pattern allows extracting structured output from a long document with impro
 
 ## Use cases
 
-- Structured work experience extraction from a long resume \(more than 3-4 pages\)
+- Structured work experience extraction from a long resume (more than 3-4 pages)
 - Structured extraction of transactions from credit card statement
 
 ## Solution
