@@ -1,70 +1,59 @@
 # Reranking
 
-# Problem
+## Problem
 
-When building Retrieval-Augmented Generation (RAG) applications, a common approach is to retrieve multiple chunks of text from a data source and feed them directly to a language model. However, doing so can lead to several potential issues:
+Initial retrieval results are often "good enough" but not ordered for answer generation. Relevant chunks can appear below weak or noisy chunks, which wastes context budget and increases the chance that the generator relies on lower-quality evidence.
 
-- **Lost in the Middle**: LLMs, like humans, often emphasize the beginning or end of long passages, potentially missing crucial content in the middle.
-- **Noisy or Contradictory Content**: Retrieval processes can yield irrelevant or contradictory text that negatively impacts the final generated answer.
-- **Context Window Limitations**: Even if you retrieve a large quantity of relevant content, there is only so much that can fit into the model’s input. Unprioritized chunks risk exceeding the limit or cluttering the context.
+## Condition
 
-Without the Reranking Design Pattern, critical information can be overshadowed by less relevant content, contradictory material may creep into the final answer, and you risk suboptimal usage of the model’s context window.
+Use this pattern when:
 
-# Condition
+- Retrieval returns more candidate chunks than can be sent to generation.
+- Top-k retrieval quality varies across query types (exact-match queries vs semantic queries).
+- You observe answer quality improving when you manually reorder chunks.
 
-This pattern is most suitable when:
+Do not use this pattern when:
 
-- **High-Volume Retrieval**: You are retrieving numerous chunks, and not all can be used at once due to context window constraints.
-- **Quality Control**: You need to minimize the risk of noisy or factually incorrect chunks surfacing in the final response.
-- **Performance & Cost Optimization**: You want to ensure only the most valuable chunks are processed by the model to reduce computational cost.
+- Your retriever already produces consistently high precision in the top positions for your target tasks.
+- Added reranking latency would violate strict real-time response constraints.
 
-### Example Use Cases
+## Solution
+
+1. Retrieve a broader candidate set from the first-stage retriever (for example top 30-100 chunks).
+2. Score each candidate against the user query with a reranker:
+   - Rule-based scorer (BM25/MMR/feature-weighted heuristics), or
+   - Model-based scorer (cross-encoder or LLM judge).
+3. Sort candidates by reranker score and apply diversity constraints to avoid near-duplicate chunks.
+4. Keep the top-ranked subset that fits generation budget.
+5. Pass ranked chunks plus score and source metadata to the generation step.
+6. Monitor reranker impact with offline metrics and end-to-end answer quality tests.
+
+## Example
+
+Example use cases:
 
 1. **Legal Document Analysis**: After retrieving multiple case law references, reranking ensures the most on-point precedents appear first.
 2. **Customer Support Knowledge Base**: A chatbot can retrieve numerous articles; reranking helps highlight the most relevant troubleshooting steps.
 3. **News Summarization**: From a large corpus of articles, reranking surfaces the most significant pieces of information first.
 
-# Solution
+An internal policy assistant retrieves 50 chunks for the query "Can contractors approve spend above $10k?".
 
-Reranking is a post-retrieval process where retrieved chunks undergo an additional pass to reorder them based on importance or relevance. The idea is to position the best (or most crucial) information at the top of the list.
+Without reranking, top chunks include generic procurement summaries. After reranking:
 
-```
-\+-------------------\+        \+------------------\+
-|    User Query     |        |   Retrieval      |
-\+---------\+---------\+        \+--------\+---------\+
-          |                          |
-          v                          v
-   \[Retrieved Document Chunks\]  <- Step 1
-          |
-          v
-      \+---------\+
-      |Reranker |
-      \+---------\+
-          |
-          v
-\[ High Priority Document Chunks... \] <- Step 2
-          |
-          v
-   \[  Final Answer Generation  \]
-```
-### Types of Reranking
+1. Chunks that explicitly mention `contractors`, `approval authority`, and `$10k` move to the top.
+2. Near-duplicate policy excerpts are collapsed.
+3. Only the top 8 chunks are sent to generation.
 
-- **Rule-Based**: Uses scoring metrics (e.g., diversity, relevance, MMR) to reorder or filter chunks.
-- **Model-Based**: Leverages an LLM or specialized ranking model to predict the relevance of each chunk.
+The final context contains the approval matrix and exceptions section instead of broad policy text.
 
-### Important Considerations
+## Tradeoffs
 
-- **Cost vs. Accuracy**: Model-based reranking tends to be more accurate but can be more expensive. Rule-based systems are cheaper and faster but may be less precise.
-- **Maintenance & Complexity**: Setting up advanced reranking models can be complex. If a simple solution suffices, rule-based methods are more straightforward to implement.
-- **Evaluation**: Track end-to-end metrics like answer correctness, factual consistency, and user satisfaction to gauge reranking effectiveness.
-- **Data Diversity**: Excessive focus on relevance alone can lead to repetitive or narrow information. Methods like MMR help balance relevance with diversity.
-- **Multimodal Applications**: Reranking can extend beyond text to prioritize or sort images, tables, and other data types.
+- Gain: better use of limited context window through stronger ordering.
+- Gain: reduced noise in the final generation input.
+- Cost: extra inference or scoring latency.
+- Cost: more evaluation and maintenance work for scoring logic.
 
-### Unique Benefits
+## Failure Modes
 
-- **Increased Accuracy**: The LLM is more likely to incorporate the most relevant information into its final response.
-- **Reduced Noise**: Chunks deemed less relevant or contradictory are pushed lower or removed, minimizing misinformation.
-- **Efficient Context Use**: By prioritizing top chunks, you make better use of the limited context window and potentially reduce computation costs.
-
-In essence, Reranking ensures that only the highest-value chunks reach the model, improving both efficiency and final answer quality in RAG pipelines.
-
+- Reranker overfits keyword overlap and suppresses semantically relevant chunks.
+- Aggressive diversity filters remove necessary corroborating evidence.
