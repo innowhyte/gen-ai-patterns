@@ -14,13 +14,18 @@ Growing context causes three major failure modes.
 
 ## Condition
 
-This pattern is best suited when:
+Use when:
 
 - When agents have long-running sessions.
 - When the agent makes frequent tool calls whose outputs (API responses, search results, database records) accumulate in context. Tool outputs are often verbose and redundant once processed.
 - When the relevance of information decays over time. Real-time analytics, monitoring systems, and iterative design processes, where yesterday's data or early-session hypotheses may not be relevant or actively mislead current reasoning.
 - When the relevance of information stays even after the session ends.
 - When cost, latency, or edge deployment constraints make unbounded context growth impractical, even if the model could technically handle it.
+
+Do not use when:
+
+- Sessions are short and naturally remain within a high-signal context window.
+- The task requires full verbatim history at all times (for example, legal transcript replay).
 
 ## Solution
 
@@ -35,7 +40,7 @@ When context reaches a threshold, stop, summarize what matters, and start a new 
 
 ### Recency Management
 
-The core intuition is that recency is a strong signal for relevance. What happened in the last five turns is almost always more relevant than what happened 30 turns ago. Keep the most recent N turns verbatim. Summarize the middle band into key points. Archive the oldest content externally, leaving only a brief reference in the active window.
+The core intuition is that recency is a strong signal for relevance. What happened in the last five turns is often more relevant than what happened 30 turns ago. Keep the most recent N turns verbatim. Summarize the middle band into key points. Archive the oldest content externally, leaving only a brief reference in the active window.
 
 ```
 Recent (full detail)  | Older (summarized)  | Oldest (archived externally)
@@ -49,9 +54,10 @@ Turn 45-50 verbatim   | Turns 20-44 summary | Turns 1-19 -> external store
 
 Some information needs to outlive the session. User preferences, established decisions, learned constraints, and validated facts should not have to be rediscovered every time. Write them out before the session ends.
 
-- **Scratchpad:** A tool the agent writes to and reads from during the session. Intermediate findings, progress notes, and validated facts live here rather than in the conversation thread. Research shows a scratchpad alone can yield up to 54% improvement on specialized benchmarks.
+- **Scratchpad:** A tool the agent writes to and reads during the session. Keep validated facts and active work state outside the live conversation.
 - **File-Based State:** For long-horizon tasks, externalize persistent state into files or structured stores. The agent reconstructs its working context from a state snapshot plus a fixed window of recent actions. Task duration is decoupled from context size.
 - **Index in Context:** Keep a lightweight ledger in the active context that maps what has been offloaded and where to find it. The agent knows what is available without carrying the full content.
+- **Cache Policy:** Cache stable context blocks and define invalidation triggers (document update timestamp, schema version change, or policy revision).
 
 The compaction prompt must be tailored to the domain. A financial analysis agent needs to preserve numbers and sources. A customer support agent needs to preserve commitments and case details. Generic summarization discards exactly what matters.
 
@@ -89,3 +95,23 @@ External scratchpad
 ```
 
 The key implementation detail is the compaction prompt. "Summarize this conversation" produces a generic paragraph that loses the account specifics. The prompt must name exactly what to extract, field by field, for the domain.
+
+## Tradeoffs
+
+- Better long-run stability, but extra complexity in memory lifecycle management.
+- Lower token cost over time, but possible loss of nuance during compaction.
+- Faster restarts, but risk of stale cached context if invalidation is weak.
+
+## Failure Modes
+
+- Compaction drops unresolved questions that were still actionable.
+- Temporal decay rules remove constraints that are still valid.
+- External memory accumulates contradictions without periodic integrity checks.
+
+## References
+
+- [Compress & Restart](https://contextpatterns.com/patterns/compress/)
+- [Write Outside the Window](https://contextpatterns.com/patterns/write-outside/)
+- [Context Caching](https://contextpatterns.com/patterns/context-caching/)
+- [Temporal Decay](https://contextpatterns.com/patterns/temporal-decay/)
+- [How to Fix Your Context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)

@@ -8,18 +8,24 @@ RAG systems and tool-integrated agents invest significant effort getting the rig
 
 Without proper grounding, the model does not treat retrieved content as the authoritative source. Instead it blends it with its own background knowledge, assumptions, and plausible-sounding guesses. This creates four compounding failures.
 
-- **[Not sure if this make sense but kept if for now.] Blending** - The model does not cleanly separate retrieved content from its own background knowledge. It mixes the two in a single response without distinguishing which is which. The output looks coherent but is part retrieved, part generated, with no boundary between them.
+- **Blending** - The model does not cleanly separate retrieved content from its own background knowledge. It mixes both into one answer without clear boundaries.
 - **Silent gap-filling** - When retrieved content is incomplete, the model does not stop and flag what is missing. It fills the gap with a confident, plausible-sounding answer drawn from training data. The response appears grounded. It is not. This is the most common RAG failure because the system looks like it is working correctly while producing wrong outputs.
 - **Contradiction** - The model's output can directly disagree with the source it was supposed to use, without acknowledging the conflict. A retrieved document states one figure; the response states another. The model does not flag this. It simply picks one, often unpredictably.
 - **Broken traceability** - Without citations anchored to specific retrieved sources, there is no way to verify whether a claim came from the documents or was generated. In enterprise, legal, or medical settings, this is not just a quality problem. It is a compliance and trust problem. A system designed for accuracy becomes one that merely sounds correct.
 
 ## Condition
 
-This pattern is best suited when:
+Use when:
 
 - The retrieved information is the authoritative source and the model must refer to it, such as internal documentation, regulatory content, product specifications, or clinical guidelines, rather than relying on training data that may be outdated or incorrect.
 - The domain changes often enough that training data is likely stale. New regulations, updated product features, recent research findings. Retrieved context is the current ground truth.
 - Responses must be traceable to specific sources for compliance, auditing, or user trust. The model must not only use retrieved content but demonstrate that it did.
+
+Do not use when:
+
+- The task is purely generative and does not require source-backed factuality.
+- Source retrieval quality is too poor to support reliable grounding decisions.
+- Latency budgets cannot support citation, validation, and insufficiency handling.
 
 ## Solution
 
@@ -84,3 +90,20 @@ With grounding:    model refers to the 24-hour figure from the docs,
 ```
 
 The anchoring instruction does two things here. It resolves the conflict between retrieved content and training knowledge in a predictable, consistent direction. And it forces the model to cite its source, which makes any silent gap-filling or blending visible rather than buried in a fluent, confident response.
+
+## Tradeoffs
+
+- Stronger factual discipline, but stricter prompts can reduce answer fluency.
+- Better auditability, but added token and latency cost for citations.
+- Safer behavior, but more "insufficient information" responses in sparse datasets.
+
+## Failure Modes
+
+- Chunk labels are inconsistent, breaking source traceability.
+- Citation fields are present but point to irrelevant chunks.
+- Retrieval misses key evidence, causing false insufficiency responses.
+
+## References
+
+- [Grounding](https://contextpatterns.com/patterns/grounding/)
+- [How to Fix Your Context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)

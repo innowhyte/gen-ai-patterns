@@ -4,34 +4,34 @@
 
 ## Problem
 
-Every token in the context window influences the model's response. Still, most agent builders assemble context in an ad-hoc, unstructured manner. System instructions, retrieved documents, tool definitions, conversation history, and examples are appended in order without thorough consideration.
+Context is often assembled by appending everything available: system instructions, retrieval chunks, tool specs, conversation history, and examples. This creates noisy prompts where critical instructions are buried and lower-value tokens compete with higher-value ones.
 
-Models exhibit the "lost in the middle" phenomenon. They attend most strongly to the beginning and end of their context window. When critical instructions or constraints land in this low-attention zone, the model ignores them.
-
-Research shows, inclusion of low-signal tokens actively degrades response quality. Including a file "just in case" isn't free. It actively competes with the information actually needed.
-
-Only putting the tool description without explicit mention of when to use it or when to avoid it. Poor descriptions cause cascading failures. The model picks the wrong tool, or the right tool with wrong arguments, or misses an opportunity to use a tool entirely.
-
-When you ask a model to produce unstructured text, you get unstructured reasoning. Without a clear target shape, the model doesn't know what matters. Give it a schema and you're not just constraining the format; you're telling it what dimensions to reason along.
+In long prompts, important constraints can land in low-attention zones and be ignored. Tool misuse also rises when tool descriptions explain what a tool does but not when to use it, when to avoid it, and what output to expect. If output format is underspecified, responses become hard to validate or automate.
 
 ## Condition
 
-This pattern is best suited when:
+Use when:
 
-- When an agent is working in policy-heavy or regulated environments.
-- Context for the agent is built by using multi-source retrieval systems.
-- When the agent has access to more than a handful of tools (APIs, functions, databases) and must select the right one for each step.
-- When the agent's output must be programmatically parsed, validated, or consumed by downstream systems.
+- The prompt combines policy, retrieval, tool use, and strict output requirements in a single turn.
+- The agent has multiple tools and repeated tool-selection errors are observed.
+- Retrieved content volume is high and only a subset is relevant to the active task.
+- Output is consumed by downstream systems and must match a schema.
+
+Do not use when:
+
+- The task is short, single-step, and does not require retrieval or tool calls.
+- The goal is early exploration where relevance is still unknown; start with progressive disclosure first.
+- A deterministic non-LLM component can solve the task more reliably.
 
 ## Solution
 
 ### Layer the Context
 
-Arrange the context window into distinct layers aligned with the model's attention distribution.
+Arrange the prompt into layers aligned to attention priority:
 
-- **Top Layer (High Attention):** System prompt, mission framing, identity, behavioral constraints, compliance rules. This is what the model must always remember.
-- **Middle Layer (Lower Attention):** Retrieved documents, reference material, conversation history, examples. Supportive content that informs reasoning but doesn't need to dominate.
-- **Bottom Layer (High Attention):** The immediate user query, task-specific instructions, output constraints, and the output schema. This is what the model must act on right now.
+- Top layer: policy, role, hard constraints.
+- Middle layer: selected evidence and brief history.
+- Bottom layer: active task, acceptance criteria, output schema.
 
 ```
 ┌─────────────────────────────────────┐
@@ -48,25 +48,105 @@ Arrange the context window into distinct layers aligned with the model's attenti
 
 ### Curate for Signal, Not Volume
 
-Before inserting any content into the context window, apply a curation step.
+For each candidate context block, pass four checks before inclusion:
 
-- **Relevance:** Is this information needed for the current query?
-- **Non-redundancy:** Is this information already present in context elsewhere?
-- **Token Budgeting:** How many tokens are allocated for each part of context, such as instructions, retrieved information, tool definition, etc?
+- Relevance: needed for the current decision.
+- Signal density: mostly useful lines, minimal boilerplate.
+- Non-redundancy: no repeated facts from other blocks.
+- Budget fit: stays within predefined token budget per layer.
 
-### Strong Tool definition
+### Define Tool Contracts
 
-A tool definition has four parts. The last two get the least attention but carry the most weight.
+For every tool, include:
 
-- **Name:** Should clearly convey the tool's purpose. get_user_profile is clear. query_42 is not.
-- **Description:** The most important part. Tells the model not just what the tool does, but when to use it and what it doesn't do. This is the context that drives tool selection.
-- **Parameters:** The input schema. Well-typed parameters and clear descriptions help the model send correctly structured inputs.
-- **Return description:** What comes back and how to interpret it. Often omitted, but it helps the model plan multi-step workflows where one tool's output feeds another.
+- Purpose in plain language.
+- Positive trigger: when to use this tool.
+- Negative trigger: when not to use this tool.
+- Parameter schema and return semantics.
 
-### Apply Output Schemas
+### Add Schema Steering and End-of-Turn Anchor
 
-When structured output is needed, include the schema in the bottom layer of context.
+Schema steering is not only about output format. It defines the reasoning surface the model must fill.
 
-- Decide what an ideal output structure should look like.
-- Define required fields, their types, and their descriptions.
-- Curate a JSON output schema.
+Design the schema as a contract:
+
+- Required fields for decisions that must always be present.
+- Typed fields for safer downstream parsing.
+- Bounded fields (enums, min/max ranges) to reduce drift.
+- Evidence fields that force grounding (`sources`, `evidence_snippets`).
+- Uncertainty fields (`confidence`, `missing_information`) so the model can express limits without guessing.
+
+Use field-level instructions, not only a top-level instruction. Example:
+
+- `root_cause`: one sentence, must be source-backed.
+- `next_step`: one concrete action with tool name or query.
+- `confidence`: one of `high|medium|low`.
+- `missing_information`: empty array if sufficient; otherwise list gaps.
+
+Apply a validation and repair loop:
+
+1. Generate output against the schema.
+2. Validate with a parser or JSON schema validator.
+3. If invalid, send validation errors back to the model and request repair-only output.
+4. Stop after a fixed retry limit and return a controlled failure state.
+
+End each turn with an anchor block that repeats success criteria for the next action. This prevents schema drift in long sessions.
+
+```json
+{
+  "type": "object",
+  "required": ["root_cause", "next_step", "confidence", "sources"],
+  "properties": {
+    "root_cause": { "type": "string", "minLength": 10 },
+    "next_step": { "type": "string", "minLength": 10 },
+    "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+    "sources": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "missing_information": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+## Example
+
+A support agent must resolve "401 after token refresh" using product docs and tools.
+
+1. Top layer includes security policy and "do not guess missing values."
+2. Middle layer includes two selected doc snippets and one recent troubleshooting result.
+3. Bottom layer includes the task plus a JSON schema with:
+   - Required fields: `root_cause`, `next_step`, `confidence`, `sources`.
+   - Optional field: `missing_information` for insufficiency reporting.
+4. Tool contract for `check_token_history` includes when-to-use and when-not-to-use.
+5. Anchor block repeats: "If docs are insufficient, return insufficiency with cited gaps."
+
+The agent returns a structured answer with source-backed reasoning and no irrelevant history.
+
+## Tradeoffs
+
+- Better reliability and parseability, but higher prompt-engineering overhead.
+- Lower hallucination risk, but less flexibility for open-ended brainstorming.
+- Strong schema control, but occasional need to revise schema as tasks evolve.
+
+## Failure Modes
+
+- Over-compression removes needed edge-case context.
+- Tool descriptions drift from actual tool behavior and mislead selection.
+- Anchor block becomes stale and reinforces outdated constraints.
+
+## References
+
+- [The Pyramid](https://contextpatterns.com/patterns/pyramid/)
+- [Select, Don't Dump](https://contextpatterns.com/patterns/select/)
+- [Schema Steering](https://contextpatterns.com/patterns/schema-steering/)
+- [Tool Descriptions as Context](https://contextpatterns.com/patterns/tool-descriptions/)
+- [Attention Anchoring](https://contextpatterns.com/patterns/attention-anchoring/)
+- [Anchor Turn](https://contextpatterns.com/patterns/anchor-turn/)
+- [How to Fix Your Context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)
+- [Attentive Reasoning Queries: A Systematic Method for Optimizing Instruction-Following in Large Language Models](https://arxiv.org/abs/2503.03669)

@@ -9,18 +9,24 @@ Complex tasks ask a single agent to juggle multiple concerns at once: researchin
 When all of this happens in one shared context, it creates four compounding failure modes.
 
 - **Cross-contamination** - Noisy search results from one sub-question pollute the reasoning space for another. A failed tool call's verbose error trace distracts from unrelated analytical work. Intermediate reasoning for one subtask bleeds into conclusions about a different one.
-- **Attention dilution.** As a single context accumulates the full breadth of a complex task, the model's attention is spread thin. It cannot go deep on any one thread because it must maintain awareness of everything simultaneously.
-- **Sequential bottleneck.** A single agent processes one step at a time, even when multiple lines of investigation could run in parallel.
-- **Boundary pollution.** When results do pass between agents, transferring raw context, full conversation histories, verbose tool outputs, and unfiltered intermediate reasoning reintroduces the exact problems that isolation was meant to solve.
+- **Attention dilution.** - As a single context accumulates the full breadth of a complex task, the model's attention is spread thin. It cannot go deep on any one thread because it must maintain awareness of everything simultaneously.
+- **Sequential bottleneck.** - A single agent processes one step at a time, even when multiple lines of investigation could run in parallel.
+- **Boundary pollution.** - When results do pass between agents, transferring raw context, full conversation histories, verbose tool outputs, and unfiltered intermediate reasoning reintroduces the exact problems that isolation was meant to solve.
 
 ## Condition
 
-This pattern is best suited when:
+Use when:
 
 - A task requires pursuing multiple independent lines of inquiry, each benefiting from deep, focused investigation rather than shallow parallel tracking in one context.
 - Different parts of the task require different domain expertise, different tool sets, or different analytical approaches. Mixing them in one context creates confusion.
 - Processing flows through sequential stages such as extract, validate, enrich, and generate, and each stage's concerns should be isolated from the others.
 - The total information needed for a task exceeds the model's effective attention range, not necessarily the window limit, but the range where quality remains high.
+
+Do not use when:
+
+- The task is simple enough to complete in one focused context.
+- Coordination overhead would exceed expected quality gains.
+- Strong consistency across all subtasks requires tightly shared state at every step.
 
 ## Solution
 
@@ -42,11 +48,13 @@ The boundary is not enforced by the architecture alone. It requires a deliberate
 
 ### Handoff Distillation
 
-hen one agent's output enters another agent's context, the question to ask is: what does the receiving agent actually need to complete its part of the task? That is all that should cross the boundary.
+When one agent's output enters another agent's context, ask what the receiver needs to complete its step. Only that should cross the boundary.
 
-Extract findings, decisions, validated facts, and key artifacts. Discard intermediate reasoning, failed attempts, raw tool outputs, and working notes. Preserve enough provenance that the receiving agent understands why a conclusion was reached, not just what it was, since it may need to reason about confidence or gaps.
+- Extract findings, decisions, validated facts, and key artifacts. 
+- Discard intermediate reasoning, failed attempts, raw tool outputs, and working notes. 
+- Preserve enough provenance that the receiving agent understands why a conclusion was reached, not just what it was, since it may need to reason about confidence or gaps.
 
-If agents pass their full working context rather than a distilled result, the receiving agent inherits all the noise the sending agent accumulated. Distribution without distillation at handoffs recreates single-agent context pollution in a more complex system.
+If agents pass their full working context rather than a distilled result, the receiving agent inherits all the noise the sending agent accumulated. Distribution without distillation at handoffs often recreates single-agent context pollution in a more complex system.
 
 ## Example
 
@@ -78,4 +86,23 @@ Orchestrator synthesizes into unified assessment.
 
 Each agent worked on its subtask without noise from the others. The orchestrator only ever saw distilled conclusions, not raw research trails. The synthesis context stayed lean enough to reason clearly across all four inputs.
 
-The critical implementation detail is distillation at the boundary. If agents return their full working context rather than a distilled result, the orchestrator's synthesis context becomes as polluted as if distribution never happened.
+The critical implementation detail is distillation at the boundary. If agents return their full working context rather than a distilled result, the orchestrator's synthesis context is likely to accumulate the same noise distribution was meant to reduce.
+
+## Tradeoffs
+
+- Higher parallel throughput, but added orchestration complexity.
+- Better focus per agent, but increased integration and merge logic.
+- Lower context pollution, but risk of losing detail during handoff distillation.
+
+## Failure Modes
+
+- Subtasks are decomposed too early and miss shared dependencies.
+- Handoffs omit key assumptions or uncertainty metadata.
+- Orchestrator overload occurs when too many workers return simultaneously.
+
+## References
+
+- [Isolate](https://contextpatterns.com/patterns/isolate/)
+- [Recursive Delegation](https://contextpatterns.com/patterns/recursive-delegation/)
+- [Progressive Disclosure](https://contextpatterns.com/patterns/progressive-disclosure/)
+- [How to Fix Your Context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)

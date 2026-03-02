@@ -7,16 +7,22 @@
 As agents operate over extended sessions, accumulate information from multiple sources, and persist knowledge across turns, the context window becomes vulnerable to corruption in ways that are subtle, compounding, and difficult to detect from the outside.
 
 - **Context poisoning** - When the model hallucinates a fact and that hallucination gets written into a scratchpad, memory system, or conversation history, it becomes ground truth for every subsequent turn. The model has no mechanism to doubt its own prior context. One fabricated number, citation, or entity persisted in state compounds indefinitely, cascading into every downstream decision that builds on it.
-- **Context contradiction** - When the model encounters conflicting information, it silently picks one version (often whichever best supports its current generation trajectory), with no consistency across multiple calls.
+- **Context contradiction** - When the model encounters conflicting information, it may pick one version (often whichever best supports its current generation trajectory), with limited consistency across multiple calls.
 - **Invisible Quality Degradation** - All the above failure modes are difficult to detect from the outside. The agent continues generating fluent, confident responses that may be internally consistent but factually wrong.
 
 ## Condition
 
-When to use this pattern:
+Use when:
 
 - **High-Stakes Decision Domains** - Downstream decisions based on the agent's output carry real consequences, such as medical, financial, legal, or safety-critical applications, where a hallucination or contradiction could cause harm.
 - **Multi-Source Information Environments** - The agent routinely combines information from multiple retrieval sources, tools, databases, or external APIs, increasing both the probability of contradictions and the difficulty of maintaining consistency.
 - **Long-Running Sessions with Persistent State** - The agent maintains state across many turns or sessions through scratchpads, memory, or conversation history, creating opportunities for hallucinated facts to enter and persist in that state.
+
+Do not use when:
+
+- Errors are low-impact and the cost of verification exceeds the cost of occasional mistakes.
+- The workflow is fully deterministic with authoritative data validation outside the model.
+- Human review is consistently required before downstream action, and model outputs are advisory only.
 
 ## Solution
 
@@ -27,7 +33,7 @@ Before any fact, finding, or intermediate conclusion is written to a scratchpad,
 - **Cross-Reference Verification:** Check key claims against source documents or authoritative databases.
 - **Structured Verification Prompts:** Use a separate LLM call (or dedicated verification agent) that asks: "Given these sources, is the following claim supported? What is the evidence?"
 - **Confidence Thresholds:** Assign confidence levels to claims. Only high-confidence, source-backed claims are persisted. Lower-confidence claims are flagged as tentative.
-- **Provenance Tracking:** Each persisted fact should include its provenance: where it came from and how it was verified. This creates an audit trail that enables both runtime verification and post-hoc analysis.
+- **Provenance Tracking:** Each persisted fact should include provenance metadata: where it came from and how it was verified. This supports runtime checks and post-hoc analysis.
 
 ```
 WITHOUT VALIDATION:
@@ -81,3 +87,20 @@ Human review triggered.
 ```
 
 The report is built on a validated, traceable state. Every persisted fact has a source. Every contradiction has a documented resolution. Nothing unverified is carried forward as established fact.
+
+## Tradeoffs
+
+- Better trust and auditability, but higher latency from verification passes.
+- Can reduce risk of corrupted memory, but requires extra storage for provenance metadata.
+- Safer conflict handling, but more escalations to human review.
+
+## Failure Modes
+
+- Validation prompts are too weak and approve unsupported claims.
+- Confidence thresholds are miscalibrated and block useful information.
+- Resolution rules conflict (recency vs authority) and produce inconsistent outcomes.
+
+## References
+
+- [Context Rot](https://contextpatterns.com/patterns/context-rot/)
+- [How to Fix Your Context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)
